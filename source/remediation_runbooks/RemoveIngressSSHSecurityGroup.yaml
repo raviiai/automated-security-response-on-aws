@@ -1,0 +1,50 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+---
+schemaVersion: "0.3"
+description: |
+  ### Document name - ASR-RemoveIngressSSHSecurityGroup
+
+  ## What does this document do?
+  This document removes SSH ingress rule from the security group associated with an AWS resource. This is done to restrict SSH access to the resource.
+
+  ## Input Parameters
+  * SecurityGroupName: (Required) The name of the security group from which SSH ingress rule needs to be removed.
+  * AutomationAssumeRole: (Required) The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that allows Systems Manager Automation to perform the actions on your behalf.
+
+  ## Output Parameters
+
+  * RemoveIngressSSHSecurityGroup.Output - stdout messages from the remediation
+
+  ## Security Standards / Controls
+  * AWS FSBP v1.0.0: EC2.3
+  * CIS v1.2.0:      n/a
+  * PCI:             EC2.3
+
+assumeRole: "{{ AutomationAssumeRole }}"
+parameters:
+  SecurityGroupName:
+    type: String
+    allowedPattern: ^[a-zA-Z0-9\-_]{1,255}$
+  AutomationAssumeRole:
+    type: String
+    description: (Required) The ARN of the role that allows Automation to perform the actions on your behalf.
+    allowedPattern: '^arn:(?:aws|aws-us-gov|aws-cn):iam::\d{12}:role/[\w+=,.@-]+$'
+
+outputs:
+  - RemoveIngressSSHSecurityGroup.Output
+
+mainSteps:
+  - name: RemoveIngressSSHSecurityGroup
+    action: 'aws:executeScript'
+    outputs:
+      - Name: Output
+        Selector: $.Payload.response
+        Type: StringMap
+    inputs:
+      InputPayload:
+        SecurityGroupName: '{{SecurityGroupName}}'
+      Runtime: python3.8
+      Handler: remove_ingress_ssh_security_group
+      Script: |-
+        %%SCRIPT=RemoveIngressSSHSecurityGroup.py%%
