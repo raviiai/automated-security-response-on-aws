@@ -24,6 +24,7 @@ cdk.Aspects.of(app).add(new cdk_nag.AwsSolutionsChecks());
 // Creates one rule per control Id. The Step Function determines what document to run based on
 // Security Standard and Control Id. See afsbp-member-stack
 const remediations: IControl[] = [
+  { control: 'DynamoDB.6' },  //added
   { control: 'AutoScaling.1' },
   { control: 'CloudFormation.1' },
   { control: 'CloudFront.1' },
