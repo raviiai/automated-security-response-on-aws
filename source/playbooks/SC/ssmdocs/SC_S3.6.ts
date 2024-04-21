@@ -58,7 +58,7 @@ export class S3BlockDenylistDocument extends ControlRunbookDocument {
       new ExecuteScriptStep(this, 'ExtractSensitiveApis', {
         language: ScriptLanguage.fromRuntime(this.runtimePython.name, 'runbook_handler'),
         code: ScriptCode.fromFile(
-          fs.realpathSync(path.join(__dirname, '..', '..', 'AFSBP', 'ssmdocs', 'scripts', 'deserializeApiList.py')),
+          fs.realpathSync(path.join(__dirname, '..', '..', 'FMPOC', 'ssmdocs', 'scripts', 'deserializeApiList.py')),
         ),
         outputs: [
           {

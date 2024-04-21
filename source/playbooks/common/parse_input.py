@@ -41,7 +41,7 @@ def get_solution_version():
 
 def get_shortname(long_name):
     short_name = {
-        "aws-foundational-security-best-practices": "AFSBP",
+        "aws-foundational-security-best-practices": "FMPOC",
         "cis-aws-foundations-benchmark": "CIS",
         "pci-dss": "PCI",
         "security-control": "SC",

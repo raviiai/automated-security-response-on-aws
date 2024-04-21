@@ -181,7 +181,7 @@ describe('member stack', function () {
 
     it('encryption key alias SSM parameter is present', function () {
       template.hasResourceProperties('AWS::SSM::Parameter', {
-        Name: `/Solutions/${solutionId}/afsbp/1.0.0/S3.4/KmsKeyAlias`,
+        Name: `/Solutions/${solutionId}/fmpoc/1.0.0/S3.4/KmsKeyAlias`,
         Type: 'String',
         Value: 'default-s3-encryption',
       });
@@ -344,7 +344,7 @@ describe('member stack', function () {
       });
     });
 
-    const expectedPlaybooks = ['AFSBP', 'CIS120', 'CIS140', 'PCI321', 'SC'];
+    const expectedPlaybooks = ['FMPOC', 'CIS120', 'CIS140', 'PCI321', 'SC'];
 
     const expectedTemplateParameterProperties = {
       AllowedValues: ['yes', 'no'],

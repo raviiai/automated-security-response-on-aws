@@ -62,6 +62,7 @@ const remediations: IControl[] = [
   { control: 'EC2.6' },
   { control: 'EC2.7' },
   { control: 'EC2.8' },
+  { control: 'EC2.9' },
   { control: 'EC2.13' },
   { control: 'EC2.14', executes: 'EC2.13' },
   { control: 'EC2.15' },

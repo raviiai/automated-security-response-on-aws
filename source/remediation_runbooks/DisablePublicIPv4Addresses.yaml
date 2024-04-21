@@ -1,0 +1,46 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+---
+schemaVersion: "0.3"
+description: |
+  ### Document name - ASR-DisablePublicIPv4Addresses
+  ## What does this document do?
+    This document ensures that an EC2 instance does not have a public IPv4 address assigned.
+
+  ## Input Parameters
+  * AutomationAssumeRole: (Required) The ARN of the role that allows Automation to perform the actions on your behalf.
+  * InstanceId: (Required) The ID of the Amazon EC2 instance.
+
+  ## Security Standards / Controls
+  * AWS FSBP v1.0.0: EC2.9
+
+assumeRole: "{{ AutomationAssumeRole }}"
+parameters:
+  AutomationAssumeRole:
+    type: String
+    description: (Required) The ARN of the role that allows Automation to perform the actions on your behalf.
+    allowedPattern: '^arn:(?:aws|aws-us-gov|aws-cn):iam::\d{12}:role/[\w+=,.@-]+$'
+  InstanceId:
+    type: String
+    description: (Required) The ID of the Amazon EC2 instance.
+    allowedPattern: '^[iI]-[0-9a-zA-Z]+$'
+
+outputs:
+  - DisablePublicIPv4Addresses.Output
+
+mainSteps:
+- name: 'DisablePublicIPv4Addresses'
+  action: 'aws:executeScript'
+  timeoutSeconds: 600
+  inputs:
+    InputPayload:
+      instance_id: '{{ InstanceId }}'
+      region: '{{global:REGION}}'
+    Runtime: 'python3.8'
+    Handler: 'lambda_handler'
+    Script: |-
+      %%SCRIPT=no_public_ipv4_address.py%%
+  outputs:
+  - Name: 'Output'
+    Selector: '$.Payload'
+    Type: 'StringMap'
