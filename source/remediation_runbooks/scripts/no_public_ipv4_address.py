@@ -1,5 +1,5 @@
 import boto3
-
+import time
 def fetch_subnet_id(instance_id, region):
     ec2_client = boto3.client('ec2', region_name=region)
     
@@ -93,11 +93,9 @@ def detach_nic(instance_id, nic_id, region):
         Force=True
     )
 
-    # Wait for 15 seconds
-    time.sleep(30)
-
-
 def delete_nic(nic_id,region):
+    # wait 
+    time.sleep(30)
     # Create EC2 client
     ec2 = boto3.client('ec2',region_name=region)
 
@@ -107,7 +105,7 @@ def delete_nic(nic_id,region):
             NetworkInterfaceId=nic_id
         )
     except Exception as e:
-        pass
+        return
     
 
 def lambda_handler(event, context):
@@ -119,12 +117,16 @@ def lambda_handler(event, context):
             old_nic_id = fetch_nic_at_device_0(instance_id, region_name)
             if old_nic_id:
                 new_nic_id = create_and_attach_nic(instance_id, subnet_id, region_name)
+                # print(new_nic_id)
                 eip_allocation_id = allocate_and_attach_eip(instance_id, old_nic_id, region_name)
                 if eip_allocation_id:   
                     remove_eip(eip_allocation_id, region_name)
                 if new_nic_id:
                     detach_nic(instance_id, new_nic_id, region_name)
-                delete_nic(new_nic_id,region_name)
+                    # print(new_nic_id)
+                    time.sleep(55)
+                    delete_nic(new_nic_id,region_name)
+
         return {
             'statusCode': 200,
             'body': f"EC2 instance {instance_id} Public IP removed successfully.."
@@ -137,9 +139,9 @@ def lambda_handler(event, context):
             'body': str(e)
         }
 
-event = {
-    "instance_id": "i-09dad4d919f752b98",
-    "region"  : "eu-west-2"
-}
+# event = {
+#     "instance_id": "i-09dad4d919f752b98",
+#     "region"  : "eu-west-2"
+# }
 
-lambda_handler(event,None)
+# lambda_handler(event,None)
