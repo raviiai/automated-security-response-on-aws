@@ -1,5 +1,10 @@
 import boto3
 import time
+
+###############################
+## Function to fetch subnet id
+################################
+
 def fetch_subnet_id(instance_id, region):
     ec2_client = boto3.client('ec2', region_name=region)
     
@@ -11,6 +16,10 @@ def fetch_subnet_id(instance_id, region):
     except Exception as e:
         # print(f"Error fetching Subnet ID: {e}")
         return None
+
+###############################
+## create and attach NIC
+################################
 
 def create_and_attach_nic(instance_id, subnet_id, region):
     ec2_client = boto3.client('ec2', region_name=region)
@@ -29,6 +38,10 @@ def create_and_attach_nic(instance_id, subnet_id, region):
     except Exception as e:
         return None
 
+###############################
+## Fetch NIC (Original)
+################################
+
 def fetch_nic_at_device_0(instance_id, region):
     ec2_client = boto3.client('ec2', region_name=region)
     
@@ -42,6 +55,9 @@ def fetch_nic_at_device_0(instance_id, region):
        
         return None
 
+###############################
+## Create and Attach EIP to instance
+################################
 def allocate_and_attach_eip(instance_id, network_interface_id, region):
     ec2_client = boto3.client('ec2', region_name=region)
     
@@ -60,6 +76,11 @@ def allocate_and_attach_eip(instance_id, network_interface_id, region):
      
         return None
 
+
+###############################
+## Remove EIP
+################################
+
 def remove_eip(allocation_id, region):
     ec2_client = boto3.client('ec2', region_name=region)
     
@@ -69,6 +90,10 @@ def remove_eip(allocation_id, region):
     except Exception as e:
         pass
 
+
+###############################
+## Detach NIC
+################################
 
 def detach_nic(instance_id, nic_id, region):
     # Create EC2 client
@@ -93,20 +118,44 @@ def detach_nic(instance_id, nic_id, region):
         Force=True
     )
 
-def delete_nic(nic_id,region):
-    # wait 
-    time.sleep(30)
-    # Create EC2 client
-    ec2 = boto3.client('ec2',region_name=region)
 
-    try:
-        # Delete NIC
-        ec2.delete_network_interface(
-            NetworkInterfaceId=nic_id
-        )
-    except Exception as e:
-        return
-    
+
+###############################
+## Delete NIC
+################################
+
+def delete_nic(nic_id, region):
+    # Create EC2 client
+    ec2 = boto3.client('ec2', region_name=region)
+
+    while True:
+        try:
+            # Describe NIC
+            response = ec2.describe_network_interfaces(
+                NetworkInterfaceIds=[nic_id]
+            )
+            nic = response['NetworkInterfaces'][0]
+            
+            # Check if NIC is available
+            if nic['Status'] == 'available':
+                # Delete NIC
+                ec2.delete_network_interface(
+                    NetworkInterfaceId=nic_id
+                )
+                # print("NIC {} deleted successfully.".format(nic_id))
+                break  # Break the loop once the NIC is deleted
+            else:
+                # print("NIC {} is not available yet. Retrying in 10 seconds...".format(nic_id))
+                time.sleep(10)  # Wait for 10 seconds before checking again
+        except Exception as e:
+            # print("Error deleting NIC {}: {}".format(nic_id, e))
+            break  # Break the loop in case of an error
+
+
+
+###############################
+## Main Lambda Handler Function
+################################
 
 def lambda_handler(event, context):
     try:
@@ -124,7 +173,6 @@ def lambda_handler(event, context):
                 if new_nic_id:
                     detach_nic(instance_id, new_nic_id, region_name)
                     # print(new_nic_id)
-                    time.sleep(55)
                     delete_nic(new_nic_id,region_name)
 
         return {
@@ -139,8 +187,11 @@ def lambda_handler(event, context):
             'body': str(e)
         }
 
+###############################
+## TESTING
+################################
 # event = {
-#     "instance_id": "i-09dad4d919f752b98",
+#     "instance_id": "i-0e511307f077d1547",
 #     "region"  : "eu-west-2"
 # }
 

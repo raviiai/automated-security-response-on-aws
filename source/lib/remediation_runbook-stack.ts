@@ -146,6 +146,7 @@ export class RemediationRunbookStack extends cdk.Stack {
       "ec2:DescribeInstances",
       "ec2:DescribeNetworkInterfaces",
       "ec2:ReleaseAddress",
+      "ec2:DeleteNetworkInterface",
       "ec2:DetachNetworkInterface");
 
       remediationPolicy.effect = Effect.ALLOW;
